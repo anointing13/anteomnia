@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-pad!t616fjfzfd36de9d&@!6=f16=e=ej(ij!rt1+(w_73%bmg
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['anteomnia.vercel.app', '127.0.0.1']
+ALLOWED_HOSTS = ['.vercel.app']
 
 
 # Application definition
@@ -54,15 +54,19 @@ INSTALLED_APPS = [
     'career',
     'oilgas',
     'news',
+    # 'investor_relations',
+    # 'financial_reports',
+    # 'press_release',
     'image_gallery',
     'transport',
     'product_special_offer',
+    'hidden_product',
     'recent_product',
+    'points_wallet',
     'help',
     'newsletter',
     'construction',
-    'events', 
-    'points_wallet',
+    'events',
 ]
 
 MIDDLEWARE = [

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.utils import timezone
-from .models import Product, HiddenProduct
+
+from .models import Product
 from django.db.models import Q
 from .forms import ProductFilterForm
 from django.shortcuts import redirect
@@ -13,11 +14,9 @@ from django.shortcuts import get_object_or_404
 from product_special_offer.models import SpecialOffer
 from recent_product.models import RecentProduct
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.utils.timezone import now
+from django.http import JsonResponse
 from newsletter.models import Subscriber
-from django.contrib import messages
-from .models import Wallet, Withdrawal, Transaction
-from .utils import handle_daily_login, handle_purchase, handle_withdrawal
+from django.utils.timezone import now
 
 
 def show(request, id):
@@ -32,7 +31,7 @@ def show(request, id):
     return render(request, 'product/detail.html', {'key': product, 'item_count': item_count})
 
 
-def product(request):
+def home(request):
     # Fetch all main products, excluding hidden products
     products = Product.objects.filter(is_hidden=False)  # Only show non-hidden products
 
@@ -63,7 +62,7 @@ def product(request):
     # Fetch recent products for the homepage and apply pagination
     recent_products = RecentProduct.objects.select_related('product').order_by('-date_added')
 
-    # Set up pagination for recent products (show 4 recent products per page)
+    # Set up pagination for recent products (show 6 recent products per page)
     recent_paginator = Paginator(recent_products, 4)  # Show 4 recent products per page
     recent_page_number = request.GET.get('recent_page')
 
@@ -95,16 +94,24 @@ def about(request):
 
 
 def shop(request):
-    # Fetch all non-hidden products by default
+    # Fetch all products that are not hidden
     product_list = Product.objects.filter(is_hidden=False)
 
-    search_query = request.GET.get('search', '')  # Get search term from GET params
-    if search_query:
-        product_list = product_list.filter(Q(name__icontains=search_query))  # Search products by name
+    # Implement search functionality
+    if request.method == "POST":
+        if request.POST.get('search'):
+            search_query = request.POST['search']
+            product_list = product_list.filter(Q(name__icontains=search_query))
 
     # Pagination
     paginator = Paginator(product_list, 3)  # Show 3 products per page
     page_number = request.GET.get('page', 1)  # Default to page 1 if not provided
+
+    # Ensure the page number is an integer
+    try:
+        page_number = int(page_number)
+    except (ValueError, TypeError):
+        page_number = 1  # Default to page 1 if the conversion fails
 
     # Pagination logic
     try:
@@ -112,6 +119,11 @@ def shop(request):
     except EmptyPage:
         # If page is out of range (e.g., 9999), deliver the last page of results.
         products = paginator.page(paginator.num_pages)
+
+    # Debugging output
+    print(f"Requested page number: {page_number}")
+    print(f"Total number of products: {paginator.count}")
+    print(f"Total number of pages: {paginator.num_pages}")
 
     # Cart item count logic
     if request.user.is_authenticated:
@@ -122,10 +134,8 @@ def shop(request):
 
     return render(request, 'product/shop.html', {
         'key': products,  # Paginated products
-        'item_count': item_count,  # Cart item count
-        'search_query': search_query,  # Display the search query in the search bar
+        'item_count': item_count  # Cart item count
     })
-
 
 
 def filter_view(request):
@@ -178,7 +188,6 @@ def filter_by_price(queryset, selected_prices):
         min_price, max_price = map(int, price_range.split('-'))
         queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
     return queryset
-
 
 
 # Define the shipping fee as a constant (ensure it's a Decimal type)
@@ -388,80 +397,3 @@ def newsletter_subscribe(request):
 def products_data(request):
     products = list(Product.objects.values('id', 'name', 'price', 'category__name', 'brand__name', 'image'))
     return JsonResponse(products, safe=False)
-
-
-def search_hidden_products(request):
-    query = request.GET.get('query', '').strip()  # Using GET for better UX
-
-    # If no query, return all hidden products
-    if not query:
-        hidden_products = HiddenProduct.get_hidden_products()
-    else:
-        hidden_products = HiddenProduct.get_hidden_products(query=query)  # Filter hidden products by query
-
-    # Pagination for hidden products
-    paginator = Paginator(hidden_products, 3)  # Show 3 products per page
-    page_number = request.GET.get('page', 1)  # Default to page 1 if not provided
-
-    try:
-        paginated_hidden_products = paginator.page(page_number)
-    except PageNotAnInteger:
-        paginated_hidden_products = paginator.page(1)
-    except EmptyPage:
-        paginated_hidden_products = paginator.page(paginator.num_pages)
-
-    return render(request, 'product/search_results.html', {
-        'hidden_products': paginated_hidden_products,
-        'query': query,
-    })
-    
-
-
-@login_required
-def wallet_view(request):
-    wallet, created = Wallet.objects.get_or_create(user=request.user)
-    transactions = wallet.transactions.all()
-
-    handle_daily_login(request.user)
-
-    return render(request, 'product/wallet.html', {'wallet': wallet, 'transactions': transactions})
-
-@login_required
-def withdraw_view(request):
-    if request.method == "POST":
-        full_name = request.POST.get("full_name")
-        mobile_money_number = request.POST.get("mobile_money_number")
-        points = int(request.POST.get("points"))
-
-        wallet, created = Wallet.objects.get_or_create(user=request.user)
-
-        try:
-            handle_withdrawal(wallet, full_name, mobile_money_number, points)
-            messages.success(request, "Withdrawal successful.")
-            return redirect("wallet_view")
-        except ValueError as e:
-            return render(request, "product/wallet.html", {
-                "error_message": str(e),
-                "full_name": full_name,
-                "mobile_money_number": mobile_money_number,
-                "points": points,
-            })
-
-    withdrawals = Withdrawal.objects.filter(wallet__user=request.user).order_by('-created_at')
-
-    return render(request, "product/wallet.html", {"withdrawals": withdrawals})
-
-@login_required
-def withdrawal_history(request):
-    withdrawals = Withdrawal.objects.filter(wallet__user=request.user)
-
-    return render(request, 'product/withdrawal_history.html', {'withdrawals': withdrawals})
-
-@login_required
-def purchase_view(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    amount = product.price
-
-    handle_purchase(request.user, amount)
-
-    return redirect('wallet_view')
