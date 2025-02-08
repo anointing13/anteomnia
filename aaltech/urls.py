@@ -33,7 +33,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('faq/', include('faq.urls')),
     path('checkout/', include('checkout.urls')),
-    path('product/', include(('product.urls', 'product'), namespace='product')),  # Include with namespace
     path('payment/', include('payment.urls')),  # Include the payment app's URLs
     path('', include('career.urls')),
     path('oilgas/', include('oilgas.urls')),  # Include oilgas app URLs
