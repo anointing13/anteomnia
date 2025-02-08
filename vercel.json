@@ -1,0 +1,28 @@
+{
+    "builds": [
+      {
+        "src": "aaltech/wsgi.py", 
+        "use": "@vercel/python", 
+        "config": { 
+          "maxLambdaSize": "50mb", 
+          "runtime": "python3.8" 
+        }
+      },
+      
+      {
+        "src": "build.sh", 
+        "use": "@vercel/static-build", 
+        "config": { 
+          "distDir": "product/static"
+        }
+      }
+
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "aaltech/wsgi.py"
+      }
+    ]
+  }
+  
