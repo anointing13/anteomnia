@@ -5,7 +5,7 @@ from product.models import Product
 
 
 class Wallet(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="wallet")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user_wallet")  # Update related_name to 'user_wallet'
     points = models.PositiveIntegerField(default=0)
     last_login_date = models.DateField(null=True, blank=True)
 
@@ -22,10 +22,10 @@ class Transaction(models.Model):
         ('PURCHASE', 'Purchase'),  # Added a new transaction type for purchases
     ]
 
-    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="transactions")
+    wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE, related_name="wallet_transactions")  # Update related_name
     transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPES)
     points = models.IntegerField()
-    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL)  # Link to product
+    product = models.ForeignKey(Product, null=True, blank=True, on_delete=models.SET_NULL, related_name="product_transactions")  # Update related_name
     product_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Store price
     created_at = models.DateTimeField(auto_now_add=True)
 

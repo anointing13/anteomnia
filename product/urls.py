@@ -8,7 +8,7 @@ from .views import add_to_cart
 
 urlpatterns = [
     path('show/<int:id>/', show, name='show'),
-    path('', home, name='home'),
+    path('', views.product, name='product'),
     path('shop/', shop, name='shop'),
     path('shop/show/<int:id>/', show, name='show'),
     # path('checkout/', checkout, name='checkout'),
@@ -28,5 +28,9 @@ urlpatterns = [
     path('sammury/', payment_view, name='sammury'),
     path('newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
     path('products-data/', views.products_data, name='products_data'),
-
+    
+    path('wallet/', views.wallet_view, name='wallet_view'),
+    path('withdraw/', views.withdraw_view, name='withdraw_view'),
+    path('purchase/<int:product_id>/', views.purchase_view, name='purchase_view'),
+    path('withdrawal-history/', views.withdrawal_history, name='withdrawal_history'),
 ]

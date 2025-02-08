@@ -54,19 +54,15 @@ INSTALLED_APPS = [
     'career',
     'oilgas',
     'news',
-    # 'investor_relations',
-    # 'financial_reports',
-    # 'press_release',
     'image_gallery',
     'transport',
     'product_special_offer',
-    'hidden_product',
     'recent_product',
-    'points_wallet',
     'help',
     'newsletter',
     'construction',
-    'events',
+    'events', 
+    'points_wallet',
 ]
 
 MIDDLEWARE = [
