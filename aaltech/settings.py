@@ -58,7 +58,6 @@ INSTALLED_APPS = [
     'transport',
     'product_special_offer',
     'recent_product',
-    'points_wallet',
     'help',
     'newsletter',
     'construction',

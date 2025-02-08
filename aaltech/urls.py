@@ -42,7 +42,6 @@ urlpatterns = [
     path('image_gallery/', include('image_gallery.urls')),
     path('special-offers/', include('product_special_offer.urls')),
     path('recent-product/', include('recent_product.urls')),  # Include the recent_product app
-    path('points-wallet/', include('points_wallet.urls', namespace='points_wallet')),  # Include with namespace
     path('', include('help.urls')),
     path('newsletter/', include('newsletter.urls')),
     path('construction/', include('construction.urls')),

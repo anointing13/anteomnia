@@ -277,7 +277,7 @@
 <div id="withdraw-modal">
     <div>
         <h2>Withdraw Points</h2>
-        <form method="POST" action="{% url 'points_wallet:withdraw_view' %}" onsubmit="return validateWithdrawal();">
+        <form method="POST" action="{% url 'withdraw_view' %}" onsubmit="return validateWithdrawal();">
             {% csrf_token %}
             <div>
                 <input type="text" name="full_name" placeholder="Full Name" required>
@@ -339,7 +339,7 @@
 
 <script>
     function goToWithdrawalHistory() {
-        window.location.href = '/points-wallet/withdrawal-history/';
+        window.location.href = '/withdrawal-history/';
     }
 </script>
 
