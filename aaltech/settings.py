@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'product',
     'contact',
     'accounts',
     'faq',
@@ -62,6 +61,8 @@ INSTALLED_APPS = [
     'newsletter',
     'construction',
     'events',
+    'product',
+
 ]
 
 MIDDLEWARE = [
